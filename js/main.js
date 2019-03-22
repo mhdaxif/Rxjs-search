@@ -1,38 +1,39 @@
 // Observables
-const { fromEvent, Observable, of, from, merge } = rxjs;
-const { ajax } = rxjs.ajax;
+const { fromEvent, from } = rxjs;
 
 // Operators
-const { map, filter, pluck, auditTime, switchAll, tap, take, combineAll } = rxjs.operators;
+const { map, filter, pluck, auditTime, distinctUntilChanged, switchMap, tap, take} = rxjs.operators;
+const { ajax } = rxjs.ajax;
 
-var input = document.querySelectorAll("#search, #totalPick");
 var total;
-var sourceKeyup = fromEvent(input, "keyup");
-var sourceChange = fromEvent(input, "change");
 
-const merged = merge(sourceKeyup, sourceChange);
+var searchEle = document.querySelector("#search");
+var size = document.querySelector("#totalPick");
 
-var sourceObs = merged.pipe(
+var source = fromEvent(searchEle, "keyup");
+var sourceObs = source.pipe(
+    auditTime(2000), 
     pluck("target", "value"),
-   // filter((text) => text.length > 2),
-    auditTime(2000),
-    tap(_ => {
+    filter((text) => {
+        // clear previous search results
         document.querySelector(".main-wrapper").innerHTML = "";
-        let val =  +document.querySelector("#totalPick").value;
-        total = val <= 0 ? 5 : val;
+        let val = +document.querySelector("#totalPick").value;
+        total = val <= 0 ? 5 : val; 
+        
+        //  if length is greater than 1 
+        return text.trim().length > 1; 
     }),
-    map((searchTerm) => {
-        searchTerm = searchTerm.trim() ||  "mhdaxif";
+    distinctUntilChanged(),
+    switchMap((searchTerm) => { 
+        searchTerm = searchTerm.trim() || "mhdaxif";
         return doSearch(searchTerm);
     }),
-    switchAll(),
-    map(res => from(res.items).pipe(take(total || 5))),
-    switchAll()
+    switchMap(res => from(res.items).pipe(take(total || 5))),
 );
 
 sourceObs.subscribe(
     (item) => appendItem(item),
-    (err) => handleError(err) 
+    (err) => handleError(err)
 );
 
 function doSearch(searchTerm) {
