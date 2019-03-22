@@ -23,7 +23,7 @@ var sourceObs = source.pipe(
         //  if length is greater than 1 
         return text.trim().length > 1; 
     }),
-    distinctUntilChanged(),
+    //distinctUntilChanged(),
     switchMap((searchTerm) => { 
         searchTerm = searchTerm.trim() || "mhdaxif";
         return doSearch(searchTerm);
