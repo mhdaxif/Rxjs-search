@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-world-deployment
+  name: rxjs-app-deployment
   labels:
-    app: hello-world
+    app: rxjs-app
 spec:
   selector:
     matchLabels:
-      app: hello-world
+      app: rxjs-app
   replicas: 2
   template:
     metadata:
       labels:
-        app: hello-world
+        app: rxjs-app
     spec:
       containers:
-      - name: hello-world
-        image: bhargavshah86/kube-test:v0.1
+      - name: rxjs-app
+        image: rxjs-search:v1
         ports:
         - containerPort: 80
         resources:
@@ -30,13 +30,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-world
+  name: rxjs-app
 spec:
   selector:
-    app: hello-world
+    app: rxjs-app
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-      nodePort: 30081   
+      nodePort: 30082   
   type: NodePort
